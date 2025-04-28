@@ -1,0 +1,15 @@
+.wordGrid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin: 20px 0;
+}
+
+.wordGridContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  margin: 0 auto;
+  max-width: 300px;
+}
