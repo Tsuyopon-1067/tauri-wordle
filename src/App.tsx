@@ -1,17 +1,10 @@
 import "./App.css";
-import WordGrid from "./components/organisms/WordGrid";
+import WordGridWithInput from "./components/organisms/WordGridWithInput";
 
 function App() {
   return (
     <div className="App">
-      <WordGrid
-        words={["HELLO", "WORLD", "REACT"]}
-        states={[
-          ["correct", "present", "absent", "absent", "absent"],
-          ["absent", "absent", "correct", "absent", "present"],
-          ["absent", "absent", "absent", "absent", "absent"],
-        ]}
-      />
+      <WordGridWithInput />
     </div>
   );
 }
