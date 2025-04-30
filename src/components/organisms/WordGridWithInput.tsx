@@ -6,7 +6,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { AnswerHistory } from '../../type/GameStatus';
 
 const WordGridWithInput = () => {
-  const [histories, setHistories] = useState<AnswerHistory>([[]]);
+  const [histories, setHistories] = useState<AnswerHistory>([]);
 
   const handleReset = () => {
     invoke<AnswerHistory>('reset', {})

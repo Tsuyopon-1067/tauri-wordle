@@ -27,12 +27,19 @@ const InputArea = ({ onSubmit }: InputAreaProps) => {
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      handleSubmit();
+    }
+  };
+
   return (
     <div className={styles.container}>
       <input
         type='text'
         value={input}
         onChange={handleInputChange}
+        onKeyDown={handleKeyDown}
         className={styles.input}
         maxLength={5}
       />
