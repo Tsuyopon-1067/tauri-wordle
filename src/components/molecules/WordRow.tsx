@@ -1,13 +1,13 @@
-import GridCell from "../atoms/GridCell";
-import styles from "./WordRow.module.css";
+import GridCell from '../atoms/GridCell';
+import styles from './WordRow.module.css';
 
 interface WordRowProps {
   word: string;
-  states?: ("correct" | "present" | "absent")[];
+  states?: ('correct' | 'present' | 'absent')[];
 }
 
-const WordRow = ({ word = "", states = [] }: WordRowProps) => {
-  const letters = word.padEnd(5).slice(0, 5).split("");
+const WordRow = ({ word = '', states = [] }: WordRowProps) => {
+  const letters = word.padEnd(5).slice(0, 5).split('');
 
   return (
     <div className={styles.wordRow}>

@@ -1,7 +1,7 @@
 export enum LetterStatus {
-  Correct = "Correct",
-  Present = "Present",
-  Absent = "Absent",
+  Correct = 'Correct',
+  Present = 'Present',
+  Absent = 'Absent',
 }
 
 export interface AnswerHistoryLetter {

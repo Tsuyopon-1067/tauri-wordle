@@ -1,13 +1,13 @@
-import WordRow from "../molecules/WordRow";
-import styles from "./WordGrid.module.css";
+import WordRow from '../molecules/WordRow';
+import styles from './WordGrid.module.css';
 
 interface WordGridProps {
   words: string[];
-  states?: ("correct" | "present" | "absent")[][];
+  states?: ('correct' | 'present' | 'absent')[][];
 }
 
 const WordGrid = ({ words = [], states = [] }: WordGridProps) => {
-  const paddedWords = [...words].concat(Array(6 - words.length).fill(""));
+  const paddedWords = [...words].concat(Array(6 - words.length).fill(''));
 
   return (
     <div className={styles.wordGrid}>
