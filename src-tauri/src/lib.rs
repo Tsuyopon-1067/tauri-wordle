@@ -12,10 +12,11 @@ lazy_static! {
     static ref WORD_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
 }
 
+type AnswerHistory = Vec<Vec<AnswerHistoryLetter>>;
 #[derive(Clone, Serialize)]
 pub struct GameStatus {
     pub answer: String,
-    pub histories: Vec<Vec<AnswerHistoryLetter>>,
+    pub histories: AnswerHistory,
     pub is_clear: bool,
 }
 
@@ -29,12 +30,12 @@ impl GameStatus {
         }
     }
 
-    pub fn push(&mut self, word: String) -> &Self {
+    pub fn push(&mut self, word: String) -> AnswerHistory {
         if word.len() != self.answer.len()
             || !WORD_LIST.lock().unwrap().contains(&word)
             || self.is_clear
         {
-            return self;
+            return self.histories.clone();
         }
         let answer_chars: Vec<char> = self.answer.chars().collect();
         let row: Vec<AnswerHistoryLetter> = word
@@ -56,13 +57,13 @@ impl GameStatus {
         if word.chars().enumerate().all(|(i, c)| c == answer_chars[i]) {
             self.is_clear = true;
         }
-        self
+        self.histories.clone()
     }
 
-    pub fn reset(&mut self) -> &Self {
+    pub fn reset(&mut self) -> AnswerHistory {
         self.histories.clear();
         self.is_clear = false;
-        self
+        self.histories.clone()
     }
 }
 
@@ -129,12 +130,12 @@ fn get_word() -> String {
 }
 
 #[tauri::command]
-fn check_word(word: String) -> GameStatus {
+fn check_word(word: String) -> AnswerHistory {
     GAME_STATUS.lock().unwrap().push(word).clone()
 }
 
 #[tauri::command]
-fn reset() -> GameStatus {
+fn reset() -> AnswerHistory {
     GAME_STATUS.lock().unwrap().reset().clone()
 }
 
@@ -147,12 +148,17 @@ mod tests {
         *GAME_STATUS.lock().unwrap() = GameStatus::new("apple".to_string());
     }
 
+    fn get_game_status() -> GameStatus {
+        GAME_STATUS.lock().unwrap().clone()
+    }
+
     #[test]
     fn test_check_word_correct() {
         setup();
-        let result = check_word("apple".to_string());
-        assert!(result.is_clear);
-        assert!(result.histories[0]
+        let histories = check_word("apple".to_string());
+        let game_status = get_game_status();
+        assert!(game_status.is_clear);
+        assert!(histories[0]
             .iter()
             .all(|l| matches!(l.status, LetterStatus::Correct)));
     }
@@ -160,13 +166,11 @@ mod tests {
     #[test]
     fn test_check_word_present_letters() {
         setup();
-        let result = check_word("grape".to_string());
-        assert!(!result.is_clear);
-        assert_eq!(result.histories.len(), 1);
-        let statuses: Vec<LetterStatus> = result.histories[0]
-            .iter()
-            .map(|l| l.status.clone())
-            .collect();
+        let histories = check_word("grape".to_string());
+        let game_status = get_game_status();
+        assert!(!game_status.is_clear);
+        assert_eq!(game_status.histories.len(), 1);
+        let statuses: Vec<LetterStatus> = histories[0].iter().map(|l| l.status.clone()).collect();
         assert_eq!(
             statuses,
             vec![
@@ -182,13 +186,13 @@ mod tests {
     #[test]
     fn test_check_word_absent_letters() {
         setup();
-        let result = check_word("onion".to_string());
-        assert!(!result.is_clear);
-        assert_eq!(result.histories.len(), 1);
+        let histories = check_word("onion".to_string());
+        let game_status = get_game_status();
+        assert!(!game_status.is_clear);
+        assert_eq!(histories.len(), 1);
         // apple
         // onion
-        println!("{:?}", result.histories[0]);
-        assert!(result.histories[0]
+        assert!(histories[0]
             .iter()
             .all(|l| matches!(l.status, LetterStatus::Absent)));
     }
@@ -196,44 +200,50 @@ mod tests {
     #[test]
     fn test_check_word_invalid_word() {
         setup();
-        let initial_history_count = GAME_STATUS.lock().unwrap().histories.len();
-        let result = check_word("xyzzy".to_string());
-        assert_eq!(result.histories.len(), initial_history_count);
+        let game_status = get_game_status();
+        let initial_history_count = game_status.histories.len();
+        let histories = check_word("xyzzy".to_string());
+        assert_eq!(histories.len(), initial_history_count);
     }
 
     #[test]
     fn test_check_word_wrong_length() {
         setup();
-        let initial_history_count = GAME_STATUS.lock().unwrap().histories.len();
-        let result = check_word("banana".to_string());
-        assert_eq!(result.histories.len(), initial_history_count);
+        let game_status = get_game_status();
+        let initial_history_count = game_status.histories.len();
+        let histories = check_word("banana".to_string());
+        assert_eq!(histories.len(), initial_history_count);
     }
 
     #[test]
     fn test_check_word_not_exist() {
         setup();
-        let initial_history_count = GAME_STATUS.lock().unwrap().histories.len();
-        let result = check_word("abcde".to_string());
-        assert_eq!(result.histories.len(), initial_history_count);
+        let game_status = get_game_status();
+        let initial_history_count = game_status.histories.len();
+        let histories = check_word("abcde".to_string());
+        assert_eq!(histories.len(), initial_history_count);
     }
 
     #[test]
     fn test_check_after_clear_cannot_push() {
         setup();
-        let result = check_word("apple".to_string());
-        assert!(result.is_clear);
-        assert_eq!(result.histories.len(), 1);
-        let result = check_word("peach".to_string());
-        assert_eq!(result.histories.len(), 1);
+        let histories = check_word("apple".to_string());
+        let game_status = get_game_status();
+        assert!(game_status.is_clear);
+        assert_eq!(histories.len(), 1);
+        let histories = check_word("peach".to_string());
+        assert_eq!(histories.len(), 1);
     }
 
     #[test]
     fn test_clear_reset() {
         setup();
-        let mut result = check_word("apple".to_string());
-        assert!(result.is_clear);
-        let result = result.reset();
-        assert!(!result.is_clear);
+        check_word("apple".to_string());
+        let game_status = get_game_status();
+        assert!(game_status.is_clear);
+        GAME_STATUS.lock().unwrap().reset();
+        let game_status = get_game_status();
+        assert!(!game_status.is_clear);
     }
 }
 
