@@ -1,9 +1,9 @@
-import "./App.css";
-import WordGridWithInput from "./components/organisms/WordGridWithInput";
+import './App.css';
+import WordGridWithInput from './components/organisms/WordGridWithInput';
 
 function App() {
   return (
-    <div className="App">
+    <div className='App'>
       <WordGridWithInput />
     </div>
   );

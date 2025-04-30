@@ -1,6 +1,6 @@
-import { AnswerHistoryLetter } from "../../type/GameStatus";
-import GridCell from "../atoms/GridCell";
-import styles from "./WordRow.module.css";
+import { AnswerHistoryLetter } from '../../type/GameStatus';
+import GridCell from '../atoms/GridCell';
+import styles from './WordRow.module.css';
 
 interface WordRowProps {
   histories: AnswerHistoryLetter[];
