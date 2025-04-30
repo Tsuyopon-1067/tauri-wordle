@@ -58,6 +58,12 @@ impl GameStatus {
         }
         self
     }
+
+    pub fn reset(&mut self) -> &Self {
+        self.histories.clear();
+        self.is_clear = false;
+        self
+    }
 }
 
 #[derive(Debug, Clone, Serialize, PartialEq)]
@@ -125,6 +131,11 @@ fn get_word() -> String {
 #[tauri::command]
 fn check_word(word: String) -> GameStatus {
     GAME_STATUS.lock().unwrap().push(word).clone()
+}
+
+#[tauri::command]
+fn reset() -> GameStatus {
+    GAME_STATUS.lock().unwrap().reset().clone()
 }
 
 #[cfg(test)]
@@ -230,7 +241,7 @@ pub fn run() {
     *GAME_STATUS.lock().unwrap() = GameStatus::new(random_word);
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![greet, get_word, check_word])
+        .invoke_handler(tauri::generate_handler![greet, get_word, check_word, reset])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
