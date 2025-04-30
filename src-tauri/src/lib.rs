@@ -30,7 +30,10 @@ impl GameStatus {
     }
 
     pub fn push(&mut self, word: String) -> &Self {
-        if word.len() != self.answer.len() || !WORD_LIST.lock().unwrap().contains(&word) {
+        if word.len() != self.answer.len()
+            || !WORD_LIST.lock().unwrap().contains(&word)
+            || self.is_clear
+        {
             return self;
         }
         let answer_chars: Vec<char> = self.answer.chars().collect();
@@ -49,6 +52,10 @@ impl GameStatus {
             })
             .collect();
         self.histories.push(row);
+        let answer_chars: Vec<char> = self.answer.chars().collect();
+        if word.chars().enumerate().all(|(i, c)| c == answer_chars[i]) {
+            self.is_clear = true;
+        }
         self
     }
 }
@@ -133,7 +140,7 @@ mod tests {
     fn test_check_word_correct() {
         setup();
         let result = check_word("apple".to_string());
-        assert!(!result.is_clear);
+        assert!(result.is_clear);
         assert!(result.histories[0]
             .iter()
             .all(|l| matches!(l.status, LetterStatus::Correct)));
@@ -197,6 +204,16 @@ mod tests {
         let initial_history_count = GAME_STATUS.lock().unwrap().histories.len();
         let result = check_word("abcde".to_string());
         assert_eq!(result.histories.len(), initial_history_count);
+    }
+
+    #[test]
+    fn test_check_after_clear_cannot_push() {
+        setup();
+        let result = check_word("apple".to_string());
+        assert!(result.is_clear);
+        assert_eq!(result.histories.len(), 1);
+        let result = check_word("peach".to_string());
+        assert_eq!(result.histories.len(), 1);
     }
 }
 
