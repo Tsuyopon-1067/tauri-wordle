@@ -226,6 +226,15 @@ mod tests {
         let result = check_word("peach".to_string());
         assert_eq!(result.histories.len(), 1);
     }
+
+    #[test]
+    fn test_clear_reset() {
+        setup();
+        let mut result = check_word("apple".to_string());
+        assert!(result.is_clear);
+        let result = result.reset();
+        assert!(!result.is_clear);
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
