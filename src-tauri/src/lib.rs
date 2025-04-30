@@ -53,7 +53,7 @@ impl GameStatus {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, PartialEq)]
 pub enum LetterStatus {
     Correct,
     Present,
@@ -118,6 +118,86 @@ fn get_word() -> String {
 #[tauri::command]
 fn check_word(word: String) -> GameStatus {
     GAME_STATUS.lock().unwrap().push(word).clone()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn setup() {
+        load_word_list("./test_word_list.txt").unwrap();
+        *GAME_STATUS.lock().unwrap() = GameStatus::new("apple".to_string());
+    }
+
+    #[test]
+    fn test_check_word_correct() {
+        setup();
+        let result = check_word("apple".to_string());
+        assert!(!result.is_clear);
+        assert!(result.histories[0]
+            .iter()
+            .all(|l| matches!(l.status, LetterStatus::Correct)));
+    }
+
+    #[test]
+    fn test_check_word_present_letters() {
+        setup();
+        let result = check_word("grape".to_string());
+        assert!(!result.is_clear);
+        assert_eq!(result.histories.len(), 1);
+        let statuses: Vec<LetterStatus> = result.histories[0]
+            .iter()
+            .map(|l| l.status.clone())
+            .collect();
+        assert_eq!(
+            statuses,
+            vec![
+                LetterStatus::Absent,  // a, g
+                LetterStatus::Absent,  // p, r
+                LetterStatus::Present, // p, a
+                LetterStatus::Present, // l, p
+                LetterStatus::Correct  // e, e
+            ]
+        );
+    }
+
+    #[test]
+    fn test_check_word_absent_letters() {
+        setup();
+        let result = check_word("onion".to_string());
+        assert!(!result.is_clear);
+        assert_eq!(result.histories.len(), 1);
+        // apple
+        // onion
+        println!("{:?}", result.histories[0]);
+        assert!(result.histories[0]
+            .iter()
+            .all(|l| matches!(l.status, LetterStatus::Absent)));
+    }
+
+    #[test]
+    fn test_check_word_invalid_word() {
+        setup();
+        let initial_history_count = GAME_STATUS.lock().unwrap().histories.len();
+        let result = check_word("xyzzy".to_string());
+        assert_eq!(result.histories.len(), initial_history_count);
+    }
+
+    #[test]
+    fn test_check_word_wrong_length() {
+        setup();
+        let initial_history_count = GAME_STATUS.lock().unwrap().histories.len();
+        let result = check_word("banana".to_string());
+        assert_eq!(result.histories.len(), initial_history_count);
+    }
+
+    #[test]
+    fn test_check_word_not_exist() {
+        setup();
+        let initial_history_count = GAME_STATUS.lock().unwrap().histories.len();
+        let result = check_word("abcde".to_string());
+        assert_eq!(result.histories.len(), initial_history_count);
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
