@@ -12,10 +12,11 @@ lazy_static! {
     static ref WORD_LIST: Mutex<Vec<String>> = Mutex::new(Vec::new());
 }
 
+type AnswerHistory = Vec<Vec<AnswerHistoryLetter>>;
 #[derive(Clone, Serialize)]
 pub struct GameStatus {
     pub answer: String,
-    pub histories: Vec<Vec<AnswerHistoryLetter>>,
+    pub histories: AnswerHistory,
     pub is_clear: bool,
 }
 
@@ -29,7 +30,7 @@ impl GameStatus {
         }
     }
 
-    pub fn push(&mut self, word: String) -> Vec<Vec<AnswerHistoryLetter>> {
+    pub fn push(&mut self, word: String) -> AnswerHistory {
         if word.len() != self.answer.len()
             || !WORD_LIST.lock().unwrap().contains(&word)
             || self.is_clear
@@ -59,7 +60,7 @@ impl GameStatus {
         self.histories.clone()
     }
 
-    pub fn reset(&mut self) -> Vec<Vec<AnswerHistoryLetter>> {
+    pub fn reset(&mut self) -> AnswerHistory {
         self.histories.clear();
         self.is_clear = false;
         self.histories.clone()
@@ -129,12 +130,12 @@ fn get_word() -> String {
 }
 
 #[tauri::command]
-fn check_word(word: String) -> Vec<Vec<AnswerHistoryLetter>> {
+fn check_word(word: String) -> AnswerHistory {
     GAME_STATUS.lock().unwrap().push(word).clone()
 }
 
 #[tauri::command]
-fn reset() -> Vec<Vec<AnswerHistoryLetter>> {
+fn reset() -> AnswerHistory {
     GAME_STATUS.lock().unwrap().reset().clone()
 }
 

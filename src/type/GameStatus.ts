@@ -5,9 +5,10 @@ export interface AnswerHistoryLetter {
   status: LetterStatus;
 }
 
+export type AnswerHistory = AnswerHistoryLetter[][];
 export interface GameStatus {
   answer: string;
-  histories: AnswerHistoryLetter[][];
+  histories: AnswerHistory;
   isClear: boolean;
   push?: (word: string) => GameStatus;
 }
