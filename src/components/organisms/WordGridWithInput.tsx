@@ -8,6 +8,14 @@ import { AnswerHistoryLetter, GameStatus } from '../../type/GameStatus';
 const WordGridWithInput = () => {
   const [histories, setHistories] = useState<AnswerHistoryLetter[][]>([[]]);
 
+  const handleReset = () => {
+    invoke<GameStatus>('reset', {})
+      .then((data) => setHistories(data.histories))
+      .catch((error) => {
+        console.error('Error resetting:', error);
+      });
+  };
+
   const handleSubmit = (word: string) => {
     invoke<GameStatus>('check_word', { word: word })
       .then((data) => setHistories(data.histories))
@@ -18,6 +26,9 @@ const WordGridWithInput = () => {
 
   return (
     <div className={styles.wordGridContainer}>
+      <button onClick={handleReset} className={styles.resetButton}>
+        リセット
+      </button>
       <WordGrid histories={histories} />
       <InputArea onSubmit={handleSubmit} />
     </div>
