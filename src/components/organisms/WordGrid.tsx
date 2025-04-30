@@ -1,18 +1,26 @@
+import { AnswerHistoryLetter } from "../../type/GameStatus";
 import WordRow from "../molecules/WordRow";
 import styles from "./WordGrid.module.css";
 
 interface WordGridProps {
-  words: string[];
+  histories: AnswerHistoryLetter[][];
   states?: ("correct" | "present" | "absent")[][];
 }
 
-const WordGrid = ({ words = [], states = [] }: WordGridProps) => {
-  const paddedWords = [...words].concat(Array(6 - words.length).fill(""));
+const WordGrid = ({ histories = [] }: WordGridProps) => {
+  const emptyGridData = {
+    letter: "",
+    status: "Absent",
+  } as AnswerHistoryLetter;
+  const emptyRowData = Array(5).fill(emptyGridData);
+  const paddedWords = [...histories].concat(
+    Array(6 - histories.length).fill(emptyRowData)
+  );
 
   return (
     <div className={styles.wordGrid}>
-      {paddedWords.slice(0, 6).map((word, index) => (
-        <WordRow key={index} word={word} states={states[index]} />
+      {paddedWords.slice(0, 6).map((rowHistory, index) => (
+        <WordRow key={index} histories={rowHistory} />
       ))}
     </div>
   );

@@ -1,15 +1,16 @@
+import { LetterStatus } from "../../type/GameStatus";
 import styles from "./GridCell.module.css";
 import LetterBox from "./LetterBox";
 
 interface GridCellProps {
   letter: string;
-  state?: "correct" | "present" | "absent";
+  status?: LetterStatus;
 }
 
-const GridCell = ({ letter, state = "absent" }: GridCellProps) => {
+const GridCell = ({ letter, status = "Absent" }: GridCellProps) => {
   return (
     <div className={styles.gridCell}>
-      <LetterBox letter={letter} state={state} />
+      <LetterBox letter={letter} status={status} />
     </div>
   );
 };

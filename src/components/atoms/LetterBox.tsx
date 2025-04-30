@@ -1,12 +1,14 @@
+import { LetterStatus } from "../../type/GameStatus";
 import styles from "./LetterBox.module.css";
 
 interface LetterBoxProps {
   letter: string;
-  state?: "correct" | "present" | "absent";
+  status?: LetterStatus;
 }
 
-const LetterBox = ({ letter, state = "absent" }: LetterBoxProps) => {
-  return <div className={`${styles.letterBox} ${styles[state]}`}>{letter}</div>;
+const LetterBox = ({ letter, status = "Absent" }: LetterBoxProps) => {
+  const statusClass = styles[status.toLocaleLowerCase()];
+  return <div className={`${styles.letterBox} ${statusClass}`}>{letter}</div>;
 };
 
 export default LetterBox;

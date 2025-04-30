@@ -1,18 +1,16 @@
+import { AnswerHistoryLetter } from "../../type/GameStatus";
 import GridCell from "../atoms/GridCell";
 import styles from "./WordRow.module.css";
 
 interface WordRowProps {
-  word: string;
-  states?: ("correct" | "present" | "absent")[];
+  histories: AnswerHistoryLetter[];
 }
 
-const WordRow = ({ word = "", states = [] }: WordRowProps) => {
-  const letters = word.padEnd(5).slice(0, 5).split("");
-
+const WordRow = ({ histories }: WordRowProps) => {
   return (
     <div className={styles.wordRow}>
-      {letters.map((letter, index) => (
-        <GridCell key={index} letter={letter} state={states[index]} />
+      {histories.map((history, index) => (
+        <GridCell key={index} letter={history.letter} status={history.status} />
       ))}
     </div>
   );

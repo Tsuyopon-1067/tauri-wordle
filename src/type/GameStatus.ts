@@ -1,8 +1,4 @@
-export enum LetterStatus {
-  Correct = "Correct",
-  Present = "Present",
-  Absent = "Absent",
-}
+export type LetterStatus = "Correct" | "Present" | "Absent";
 
 export interface AnswerHistoryLetter {
   letter: string;
