@@ -3,22 +3,22 @@ import WordGrid from './WordGrid';
 import InputArea from '../molecules/InputArea';
 import styles from './WordGrid.module.css';
 import { invoke } from '@tauri-apps/api/core';
-import { AnswerHistoryLetter, GameStatus } from '../../type/GameStatus';
+import { AnswerHistoryLetter } from '../../type/GameStatus';
 
 const WordGridWithInput = () => {
   const [histories, setHistories] = useState<AnswerHistoryLetter[][]>([[]]);
 
   const handleReset = () => {
-    invoke<GameStatus>('reset', {})
-      .then((data) => setHistories(data.histories))
+    invoke<AnswerHistoryLetter[][]>('reset', {})
+      .then((histories) => setHistories(histories))
       .catch((error) => {
         console.error('Error resetting:', error);
       });
   };
 
   const handleSubmit = (word: string) => {
-    invoke<GameStatus>('check_word', { word: word })
-      .then((data) => setHistories(data.histories))
+    invoke<AnswerHistoryLetter[][]>('check_word', { word: word })
+      .then((histories) => setHistories(histories))
       .catch((error) => {
         console.error('Error checking word:', error);
       });
