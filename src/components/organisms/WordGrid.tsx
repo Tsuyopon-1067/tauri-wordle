@@ -10,7 +10,7 @@ interface WordGridProps {
 const WordGrid = ({ histories = [] }: WordGridProps) => {
   const emptyGridData = {
     letter: '',
-    status: 'Absent',
+    status: 'None',
   } as AnswerHistoryLetter;
   const emptyRowData = Array(5).fill(emptyGridData);
   const paddedWords = [...histories].concat(
