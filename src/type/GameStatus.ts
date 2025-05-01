@@ -12,3 +12,8 @@ export interface GameStatus {
   isClear: boolean;
   push?: (word: string) => GameStatus;
 }
+
+export interface AnswerHistoryResponse {
+  histories: AnswerHistory;
+  is_update: boolean;
+}
