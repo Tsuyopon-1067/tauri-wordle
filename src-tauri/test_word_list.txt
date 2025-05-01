@@ -1,6 +1,6 @@
-apple
-grape
-lemon
-melon
-onion
-peach
+APPLE
+GRAPE
+LEMON
+MELON
+ONION
+PEACH
