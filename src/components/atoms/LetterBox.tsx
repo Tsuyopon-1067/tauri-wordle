@@ -7,7 +7,7 @@ interface LetterBoxProps {
   status?: LetterStatus;
 }
 
-const LetterBox = ({ letter, status = 'Absent' }: LetterBoxProps) => {
+const LetterBox = ({ letter, status = 'None' }: LetterBoxProps) => {
   const [isFlipping, setIsFlipping] = useState(false);
   const prevTextRef = useRef('');
 
@@ -28,12 +28,12 @@ const LetterBox = ({ letter, status = 'Absent' }: LetterBoxProps) => {
   }, [letter]);
 
   const statusClass = styles[status.toLocaleLowerCase()];
-
+  const isVisible = letter !== '' || status === 'None';
   return (
     <div
       className={`${styles.letterBox} ${isFlipping ? styles.flipActive : ''} ${statusClass}`}
       style={{
-        visibility: letter !== '' ? 'visible' : 'hidden',
+        visibility: isVisible ? 'visible' : 'hidden',
       }}
     >
       {letter}

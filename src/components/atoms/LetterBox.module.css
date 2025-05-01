@@ -41,3 +41,9 @@
   background-color: #787c7e;
   color: white;
 }
+
+.none {
+  background-color: #fff;
+  border: 2px solid #d3d6da;
+  color: white;
+}

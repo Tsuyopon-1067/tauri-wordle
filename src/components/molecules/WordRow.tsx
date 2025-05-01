@@ -15,11 +15,20 @@ const WordRow = ({ histories }: WordRowProps) => {
     data: AnswerHistoryLetter[],
     setState: React.Dispatch<React.SetStateAction<AnswerHistoryLetter[]>>
   ) => {
-    setState([]);
+    const emptyGridData = {
+      letter: '',
+      status: 'None',
+    } as AnswerHistoryLetter;
+    const emptyRowData = Array(5).fill(emptyGridData);
+    setState(emptyRowData);
     data.forEach((item, index) => {
       setTimeout(
         () => {
-          setState((prev) => [...prev, item]);
+          setState((prev) => {
+            const prevSlice = prev.slice(0, index);
+            const remainSlice = emptyRowData.slice(index + 1);
+            return [...prevSlice, item, ...remainSlice];
+          });
         },
         index * DELAY_TIME_SECOND * 1000
       );
