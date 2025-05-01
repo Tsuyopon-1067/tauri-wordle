@@ -31,13 +31,16 @@ impl GameStatus {
         }
     }
 
-    pub fn push(&mut self, word: String) -> AnswerHistory {
+    pub fn push(&mut self, word: String) -> AnswerHistoryResponse {
         let word = word.to_uppercase();
         if word.len() != self.answer.len()
             || !WORD_LIST.lock().unwrap().contains(&word)
             || self.is_clear
         {
-            return self.histories.clone();
+            return AnswerHistoryResponse {
+                histories: self.histories.clone(),
+                is_update: false,
+            };
         }
         let answer_chars: Vec<char> = self.answer.chars().collect();
         let row: Vec<AnswerHistoryLetter> = word
@@ -59,14 +62,21 @@ impl GameStatus {
         if word.chars().enumerate().all(|(i, c)| c == answer_chars[i]) {
             self.is_clear = true;
         }
-        self.histories.clone()
+
+        AnswerHistoryResponse {
+            histories: self.histories.clone(),
+            is_update: true,
+        }
     }
 
-    pub fn reset(&mut self, new_answer: String) -> AnswerHistory {
+    pub fn reset(&mut self, new_answer: String) -> AnswerHistoryResponse {
         self.histories.clear();
         self.is_clear = false;
         self.answer = new_answer;
-        self.histories.clone()
+        AnswerHistoryResponse {
+            histories: self.histories.clone(),
+            is_update: true,
+        }
     }
 }
 
@@ -87,6 +97,12 @@ impl AnswerHistoryLetter {
     pub fn new(letter: char, status: LetterStatus) -> Self {
         Self { letter, status }
     }
+}
+
+#[derive(Clone, Serialize)]
+pub struct AnswerHistoryResponse {
+    pub histories: AnswerHistory,
+    pub is_update: bool,
 }
 
 fn load_word_list(file_path: &str) -> Result<(), io::Error> {
@@ -133,12 +149,12 @@ fn get_word() -> String {
 }
 
 #[tauri::command]
-fn check_word(word: String) -> AnswerHistory {
+fn check_word(word: String) -> AnswerHistoryResponse {
     GAME_STATUS.lock().unwrap().push(word).clone()
 }
 
 #[tauri::command]
-fn reset() -> AnswerHistory {
+fn reset() -> AnswerHistoryResponse {
     let random_word = match get_random_word() {
         Ok(word) => word,
         Err(err) => panic!("error occurred while selecting word : {}", err),
@@ -162,22 +178,26 @@ mod tests {
     #[test]
     fn test_check_word_correct() {
         setup();
-        let histories = check_word("apple".to_string());
+        let response = check_word("apple".to_string());
         let game_status = get_game_status();
         assert!(game_status.is_clear);
-        assert!(histories[0]
+        assert!(response.histories[0]
             .iter()
             .all(|l| matches!(l.status, LetterStatus::Correct)));
+        assert!(response.is_update);
     }
 
     #[test]
     fn test_check_word_present_letters() {
         setup();
-        let histories = check_word("grape".to_string());
+        let response = check_word("grape".to_string());
         let game_status = get_game_status();
         assert!(!game_status.is_clear);
         assert_eq!(game_status.histories.len(), 1);
-        let statuses: Vec<LetterStatus> = histories[0].iter().map(|l| l.status.clone()).collect();
+        let statuses: Vec<LetterStatus> = response.histories[0]
+            .iter()
+            .map(|l| l.status.clone())
+            .collect();
         assert_eq!(
             statuses,
             vec![
@@ -188,20 +208,22 @@ mod tests {
                 LetterStatus::Correct  // e, e
             ]
         );
+        assert!(response.is_update);
     }
 
     #[test]
     fn test_check_word_absent_letters() {
         setup();
-        let histories = check_word("onion".to_string());
+        let response = check_word("onion".to_string());
         let game_status = get_game_status();
         assert!(!game_status.is_clear);
-        assert_eq!(histories.len(), 1);
+        assert_eq!(response.histories.len(), 1);
         // apple
         // onion
-        assert!(histories[0]
+        assert!(response.histories[0]
             .iter()
             .all(|l| matches!(l.status, LetterStatus::Absent)));
+        assert!(response.is_update);
     }
 
     #[test]
@@ -209,8 +231,9 @@ mod tests {
         setup();
         let game_status = get_game_status();
         let initial_history_count = game_status.histories.len();
-        let histories = check_word("xyzzy".to_string());
-        assert_eq!(histories.len(), initial_history_count);
+        let response = check_word("xyzzy".to_string());
+        assert_eq!(response.histories.len(), initial_history_count);
+        assert!(!response.is_update);
     }
 
     #[test]
@@ -218,8 +241,9 @@ mod tests {
         setup();
         let game_status = get_game_status();
         let initial_history_count = game_status.histories.len();
-        let histories = check_word("banana".to_string());
-        assert_eq!(histories.len(), initial_history_count);
+        let response = check_word("banana".to_string());
+        assert_eq!(response.histories.len(), initial_history_count);
+        assert!(!response.is_update);
     }
 
     #[test]
@@ -227,30 +251,36 @@ mod tests {
         setup();
         let game_status = get_game_status();
         let initial_history_count = game_status.histories.len();
-        let histories = check_word("abcde".to_string());
-        assert_eq!(histories.len(), initial_history_count);
+        let response = check_word("abcde".to_string());
+        assert_eq!(response.histories.len(), initial_history_count);
+        assert!(!response.is_update);
     }
 
     #[test]
     fn test_check_after_clear_cannot_push() {
         setup();
-        let histories = check_word("apple".to_string());
+        let response = check_word("apple".to_string());
         let game_status = get_game_status();
         assert!(game_status.is_clear);
-        assert_eq!(histories.len(), 1);
-        let histories = check_word("peach".to_string());
-        assert_eq!(histories.len(), 1);
+        assert_eq!(response.histories.len(), 1);
+        assert!(response.is_update);
+
+        let response = check_word("peach".to_string());
+        assert_eq!(response.histories.len(), 1);
+        assert!(!response.is_update);
     }
 
     #[test]
     fn test_clear_reset() {
         setup();
-        check_word("apple".to_string());
+        let response = check_word("apple".to_string());
         let game_status = get_game_status();
         assert!(game_status.is_clear);
-        GAME_STATUS.lock().unwrap().reset();
+        assert!(response.is_update);
+        let response = GAME_STATUS.lock().unwrap().reset("grape".to_string());
         let game_status = get_game_status();
         assert!(!game_status.is_clear);
+        assert!(response.is_update);
     }
 }
 
