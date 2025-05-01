@@ -60,9 +60,10 @@ impl GameStatus {
         self.histories.clone()
     }
 
-    pub fn reset(&mut self) -> AnswerHistory {
+    pub fn reset(&mut self, new_answer: String) -> AnswerHistory {
         self.histories.clear();
         self.is_clear = false;
+        self.answer = new_answer;
         self.histories.clone()
     }
 }
@@ -136,7 +137,11 @@ fn check_word(word: String) -> AnswerHistory {
 
 #[tauri::command]
 fn reset() -> AnswerHistory {
-    GAME_STATUS.lock().unwrap().reset().clone()
+    let random_word = match get_random_word() {
+        Ok(word) => word,
+        Err(err) => panic!("error occurred while selecting word : {}", err),
+    };
+    GAME_STATUS.lock().unwrap().reset(random_word).clone()
 }
 
 #[cfg(test)]
