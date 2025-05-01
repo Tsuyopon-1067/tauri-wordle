@@ -22,6 +22,7 @@ pub struct GameStatus {
 
 impl GameStatus {
     pub fn new(answer: String) -> Self {
+        let answer = answer.to_uppercase();
         let histories = Vec::new();
         Self {
             answer,
@@ -31,6 +32,7 @@ impl GameStatus {
     }
 
     pub fn push(&mut self, word: String) -> AnswerHistory {
+        let word = word.to_uppercase();
         if word.len() != self.answer.len()
             || !WORD_LIST.lock().unwrap().contains(&word)
             || self.is_clear
