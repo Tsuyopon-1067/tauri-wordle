@@ -22,7 +22,11 @@ const WordGridWithInput = () => {
 
   const handleSubmit = (word: string) => {
     invoke<AnswerHistoryResponse>('check_word', { word: word })
-      .then((response) => setHistories(response.histories))
+      .then((response) => {
+        if (response.is_update) {
+          setHistories(response.histories);
+        }
+      })
       .catch((error) => {
         console.error('Error checking word:', error);
       });
