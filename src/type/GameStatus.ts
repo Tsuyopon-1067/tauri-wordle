@@ -1,4 +1,4 @@
-export type LetterStatus = 'Correct' | 'Present' | 'Absent';
+export type LetterStatus = 'Correct' | 'Present' | 'Absent' | 'None';
 
 export interface AnswerHistoryLetter {
   letter: string;

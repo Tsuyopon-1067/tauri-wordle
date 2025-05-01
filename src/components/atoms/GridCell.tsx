@@ -7,7 +7,7 @@ interface GridCellProps {
   status?: LetterStatus;
 }
 
-const GridCell = ({ letter, status = 'Absent' }: GridCellProps) => {
+const GridCell = ({ letter, status = 'None' }: GridCellProps) => {
   return (
     <div className={styles.gridCell}>
       <LetterBox letter={letter} status={status} />

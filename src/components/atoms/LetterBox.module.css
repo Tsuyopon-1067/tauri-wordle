@@ -8,6 +8,23 @@
   font-size: 2rem;
   font-weight: bold;
   text-transform: uppercase;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+}
+
+.flipActive {
+  animation: flip 0.5s ease-out;
+}
+
+@keyframes flip {
+  0% {
+    transform: rotateX(90deg);
+    opacity: 0;
+  }
+  100% {
+    transform: rotateX(0deg);
+    opacity: 1;
+  }
 }
 
 .correct {
@@ -22,5 +39,11 @@
 
 .absent {
   background-color: #787c7e;
+  color: white;
+}
+
+.none {
+  background-color: #fff;
+  border: 2px solid #d3d6da;
   color: white;
 }
