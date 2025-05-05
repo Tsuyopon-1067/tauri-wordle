@@ -49,7 +49,11 @@ impl GameStatus {
 
     pub fn push(&mut self, word: String) -> AnswerHistoryResponse {
         let word = word.to_uppercase();
-        if word.len() != self.answer.len() || !self.word_list.contains(&word) || self.is_clear {
+        if word.len() != self.answer.len()
+            || !self.word_list.contains(&word)
+            || self.is_clear
+            || self.histories.len() >= 6
+        {
             return AnswerHistoryResponse {
                 histories: self.histories.clone(),
                 is_update: false,
