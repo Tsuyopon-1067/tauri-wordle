@@ -3,6 +3,14 @@ use super::word_list::WordList;
 use crate::api::AnswerHistoryResponse;
 
 pub type AnswerHistory = Vec<Vec<AnswerHistoryLetter>>;
+/// Manages the state of a Wordle game
+///
+/// Manages the game's answer, guess history, and completion status
+/// # Fields
+/// - `answer`: The correct word to guess
+/// - `histories`: Player's guess history with letter statuses
+/// - `is_clear`: Whether the game has been won
+/// - `word_list`: The dictionary of valid words
 #[derive(Clone)]
 pub struct GameStatus {
     pub answer: String,
@@ -34,6 +42,19 @@ impl fmt::Display for GameStatus {
 }
 
 impl GameStatus {
+    /// Creates a new GameStatus instance
+    ///
+    /// # Arguments
+    /// * `path` - Path to the word list file
+    ///
+    /// # Returns
+    /// New GameStatus with random answer word
+    ///
+    /// # Examples
+    /// ```
+    /// let path = PathBuf::from("./resources/word_list.txt");
+    /// let game = GameStatus::new(&path);
+    /// ```
     pub fn new(path: &PathBuf) -> Self {
         let histories = Vec::new();
         let word_list = WordList::new(path);
@@ -47,6 +68,17 @@ impl GameStatus {
         }
     }
 
+    /// Processes a player's guess and updates game state
+    ///
+    /// # Arguments
+    /// * `word` - The guessed word
+    ///
+    /// # Returns
+    /// AnswerHistoryResponse containing updated history and status
+    ///
+    /// # Notes
+    /// Only valid words of correct length are processed
+    /// Game stops accepting guesses after being won
     pub fn push(&mut self, word: String) -> AnswerHistoryResponse {
         let word = word.to_uppercase();
         if word.len() != self.answer.len()
@@ -86,6 +118,10 @@ impl GameStatus {
         }
     }
 
+    /// Resets the game with a new random word
+    ///
+    /// # Returns
+    /// AnswerHistoryResponse with cleared history
     pub fn reset(&mut self) -> AnswerHistoryResponse {
         self.answer = self.word_list.get_random_word();
         self.histories.clear();
