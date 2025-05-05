@@ -2,7 +2,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::fs::File;
 use std::io::{self, BufRead};
-use std::path::Path;
+use std::path::{Path, PathBuf};
 
 #[derive(Clone)]
 pub struct WordList {
@@ -10,12 +10,12 @@ pub struct WordList {
 }
 
 impl WordList {
-    pub fn new(path: &str) -> Self {
+    pub fn new(path: &PathBuf) -> Self {
         let list = Self::load_word_list(path).unwrap();
         Self { list: list }
     }
 
-    fn load_word_list(file_path: &str) -> Result<Vec<String>, io::Error> {
+    fn load_word_list(file_path: &PathBuf) -> Result<Vec<String>, io::Error> {
         let path = Path::new(file_path);
         let file = File::open(path).expect("ファイルを開けません");
         let reader = io::BufReader::new(file);
