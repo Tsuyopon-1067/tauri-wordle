@@ -12,6 +12,7 @@ pub struct GameStatus {
 }
 
 use std::fmt;
+use std::path::PathBuf;
 
 impl fmt::Display for GameStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
@@ -33,7 +34,7 @@ impl fmt::Display for GameStatus {
 }
 
 impl GameStatus {
-    pub fn new(path: &str) -> Self {
+    pub fn new(path: &PathBuf) -> Self {
         let histories = Vec::new();
         let word_list = WordList::new(path);
         let answer = word_list.get_random_word();
@@ -94,10 +95,13 @@ impl GameStatus {
 
 #[cfg(test)]
 mod tests {
+    use std::path;
+
     use super::*;
 
     fn cureate_game_status() -> GameStatus {
-        let mut status = GameStatus::new("./test_word_list.txt");
+        let path = path::PathBuf::from("./resources/test_word_list.txt");
+        let mut status = GameStatus::new(&path);
         status.answer = "APPLE".to_string();
         status
     }
